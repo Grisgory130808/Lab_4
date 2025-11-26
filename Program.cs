@@ -3,8 +3,9 @@ using System.Reflection;
 using System.Security.Cryptography;
 namespace Lab_4
 {
-    class Program
+    class Programa
     {
+
         /// <summary>
         /// функция для ввода числа пользователем 
         /// </summary>
@@ -46,7 +47,7 @@ namespace Lab_4
         /// <returns>длина</returns>
         static int GetLength()
         {
-            int length;
+            int length = -1;
 
             do
             {
@@ -103,6 +104,10 @@ namespace Lab_4
         static int[] CreateArrayRandom(int length, int min, int max) 
         {
             int[] array = new int[length];
+            
+            if (length == 0)
+                return array;
+
             Random rand = new Random();
             
             for (int i = 0; i < length; i++)
@@ -180,14 +185,24 @@ namespace Lab_4
         /// <returns>массив и длина</returns>
         static (int[], int) AddElements(int[] array, int length, int n, int k)
         {
-            int startAdd = n - 1; // место начала добавления
+            int startAdd; // место начала добавления
             if (n == 0)
                 startAdd = n;
+            else
+                startAdd = n - 1;
 
             int endAdd = startAdd + k; // место конца добавления
-            length += k; // обновление длины массива            
-            int[] newArray = new int[length]; // создание нового массива
+            int lengthNew = length + k; // обновление длины массива            
+            int[] newArray = new int[lengthNew]; // создание нового массива
             Console.WriteLine("Введите элементы: ");
+            if (length == 0)
+            {
+                for (int i = 0; i < k; i++) // добавление в массив
+                {
+                    newArray[i] = GetNum();
+                }
+                return (newArray, lengthNew);
+            }
             
             for (int i = 0; i <= startAdd; i++) // перенос массива до места добавления
             {
@@ -199,13 +214,12 @@ namespace Lab_4
                 newArray[i] = GetNum();
             }
             
-            for (int i = endAdd + 1; i < length; i++) // перенос массива после места добавления
+            for (int i = endAdd + 1; i < lengthNew; i++) // перенос массива после места добавления
             {
                 newArray[i] = array[i - k];
             }
 
-            return (newArray, length);
-
+            return (newArray, lengthNew);
         }
 
         /// <summary>
@@ -278,6 +292,7 @@ namespace Lab_4
         /// <param name="length">длина массива</param>
         static void DoInsertionSort(int[] array, int length)
         {
+            int count = -1;
             for (int i = 1; i < length; i++)
             {
                 // текущий элемент для вставки
@@ -289,8 +304,10 @@ namespace Lab_4
                     // обмен ячеек местами
                     (array[sorted], array[sorted + 1]) = (array[sorted + 1], array[sorted]);
                     sorted--;
+                    count++;
                 }
             }
+            Console.WriteLine($"Массив отсортирован. Количество сравнений: {count}");
         }
 
         /// <summary>
@@ -316,13 +333,13 @@ namespace Lab_4
         }
 
         /// <summary>
-        /// часть для сортировки методом Хоара
+        /// определение начала правого подмассива для сортировки методом Хоара
         /// </summary>
         /// <param name="array">массив для сортировки</param>
         /// <param name="left">левая граница</param>
         /// <param name="right">правая граница</param>
-        /// <returns>конец левой части массива</returns>
-        static int PartSortHoar(int[] array, int left, int right)
+        /// <returns>начало правого подмассива</returns>
+        static (int,int) PartSortHoar(int[] array, int left, int right, int count)
         {
             int pivot = array[(left + right) / 2]; // нахождение опорного элемента
 
@@ -340,9 +357,10 @@ namespace Lab_4
                     (array[left], array[right]) = (array[right], array[left]);
                     left++;
                     right--;
+                    count++;
                 }
             }
-            return left;
+            return (left, count);
         }
 
         /// <summary>
@@ -351,14 +369,13 @@ namespace Lab_4
         /// <param name="array">массив для сортировки</param>
         /// <param name="start">левая граница</param>
         /// <param name="end">правая граница</param>
-        static void QuickSortHoar(int[] array, int start, int end)
+        static void QuickSortHoar(int[] array, int start, int end, int count)
         {
             if (start >= end) 
                 return;
-
-            int rightStart = PartSortHoar(array, start, end);
-            QuickSortHoar(array, start, rightStart - 1); // рекурсивный вызов сортировки для левой части массива
-            QuickSortHoar(array, rightStart, end); // рекурсивный вызов сортировки для правой части массива
+            (int rightStart, count) = PartSortHoar(array, start, end, count);
+            QuickSortHoar(array, start, rightStart - 1, count); // рекурсивный вызов сортировки для левой части массива
+            QuickSortHoar(array, rightStart, end, count); // рекурсивный вызов сортировки для правой части массива
         }
         
         /// <summary>
@@ -367,7 +384,9 @@ namespace Lab_4
         /// <param name="array">массив для сортировки</param>
         static void DoQuickSortHoar(int[] array)
         {
-            QuickSortHoar(array,0,array.Length-1);
+            int count = 0;
+            QuickSortHoar(array,0,array.Length-1, 0);
+            Console.WriteLine($"Массив отсортирован. Количество сравнений : {count}");
         }
 
         /// <summary>
@@ -377,6 +396,7 @@ namespace Lab_4
         /// <param name="length">длина массива</param>
         static void DoShellSort(int[] array, int length)
         {
+            int count = -1;
             // начало с большого шага, затем меньше
             for (int gap = length / 2; gap > 0; gap /= 2)
             {
@@ -391,10 +411,12 @@ namespace Lab_4
                     {
                         array[j] = array[j - gap];
                         j -= gap;
+                        count++;
                     }
                     array[j] = temp;
                 }
             }
+            Console.WriteLine($"Массив отсортирован. Количество сравнений : {count}");
         }
         
         static void Main(string[] args)
@@ -411,7 +433,7 @@ namespace Lab_4
                 
                 switch (choice)
                 {
-                    case 1:
+                    case 1: 
                         {
                             Console.WriteLine("\nВы выбрали формирование массива с помощью ДСЧ.");
                             length = GetLength();
@@ -457,10 +479,12 @@ namespace Lab_4
                                             do
                                             {
                                                 delete = GetNum("Введите номер элемента который нужно удалить: ") - 1;
+
                                                 if (delete < 0 || delete >= length)
                                                 {
                                                     Console.WriteLine($"Ошибка: введите число от 1 до {length}!");
                                                 }
+
                                             } while (delete < 0 || delete >= length);
                                             
                                             int item = array[delete];
@@ -476,24 +500,30 @@ namespace Lab_4
                                             do
                                             {
                                                 k = GetNum("Введите количество элементов: ");
+
                                                 if (k < 0)
                                                 {
                                                     Console.WriteLine("Количество элементов должно быть положительным!");
                                                     continue;
                                                 }
-                                                n = GetNum("Введите номер элемента после которого нужно добавить элементы: ");
-                                                if (n <= 0 || n >= length)
-                                                {
-                                                    Console.WriteLine("Неверно введен номер элемента!");
-                                                    continue;
-                                                }
-                                            } while (k < 0 || n <= 0 || n >= length);
+                                            } while (k < 0);
 
                                             if (k == 0)
                                             {
                                                 Console.WriteLine("Элементы добавлены.\n");
                                                 break;
                                             }
+
+                                            do
+                                            {
+                                                n = GetNum("Введите номер элемента после которого нужно добавить элементы: ");
+
+                                                if (n < 0 || n > length)
+                                                {
+                                                    Console.WriteLine("Неверно введен номер элемента!");
+                                                    continue;
+                                                }
+                                            } while (n < 0 || n > length);
 
                                             (array, length) = AddElements(array, length, n, k);
                                             Console.WriteLine("Элементы добавлены.\n");
@@ -542,6 +572,7 @@ namespace Lab_4
                                         {
                                             Console.WriteLine("\nВы выбрали бинарный поиск элемента.");
                                             DoQuickSortHoar(array); // сортировка массива методом Хоара
+                                            Console.WriteLine("Массив отсортирован.");
                                             int target = GetNum("Введите значение элемента для поиска: ");
                                             DoBinarySearch(array, length, target);
                                             break;
@@ -579,7 +610,10 @@ namespace Lab_4
                         {
                             Console.WriteLine("\nВы выбрали ручное формирование массива.");
                             length = GetLength();
-                            Console.WriteLine("Введите элементы массива (каждый с новой строки): ");
+                            
+                            if (length != 0)
+                                Console.WriteLine("Введите элементы массива (каждый с новой строки): ");
+
                             array = CreateArrayUser(length);
                             Console.WriteLine("Массив сформирован.\n");
 
@@ -632,30 +666,36 @@ namespace Lab_4
                                         }
                                     case 3:
                                         {
-                                            int k = 0, n = 0; // k - количество элементов, n - номер элемента
+                                            int k = 0, n = 0;
                                             Console.WriteLine("\nВы выбрали добавление элементов в массив.");
 
                                             do
                                             {
                                                 k = GetNum("Введите количество элементов: ");
+
                                                 if (k < 0)
                                                 {
                                                     Console.WriteLine("Количество элементов должно быть положительным!");
                                                     continue;
                                                 }
-                                                n = GetNum("Введите номер элемента после которого нужно добавить элементы: ");
-                                                if (n <= 0 || n >= length)
-                                                {
-                                                    Console.WriteLine("Неверно введен номер элемента!");
-                                                    continue;
-                                                }
-                                            } while (k < 0 || n <= 0 || n >= length);
+                                            } while (k < 0);
 
                                             if (k == 0)
                                             {
                                                 Console.WriteLine("Элементы добавлены.\n");
                                                 break;
                                             }
+
+                                            do
+                                            {
+                                                n = GetNum("Введите номер элемента после которого нужно добавить элементы: ");
+
+                                                if (n < 0 || n > length)
+                                                {
+                                                    Console.WriteLine("Неверно введен номер элемента!");
+                                                    continue;
+                                                }
+                                            } while (n < 0 || n > length);
 
                                             (array, length) = AddElements(array, length, n, k);
                                             Console.WriteLine("Элементы добавлены.\n");
@@ -698,13 +738,13 @@ namespace Lab_4
                                         {
                                             Console.WriteLine("\nВы выбрали сортировку массива простым включением");
                                             DoInsertionSort(array, length);
-                                            Console.WriteLine("Массив отсортирован.\n");
                                             break;
                                         }
                                     case 7:
                                         {
                                             Console.WriteLine("\nВы выбрали бинарный поиск элемента.");
                                             DoQuickSortHoar(array); // сортировка массива методом Хоара
+                                            Console.WriteLine("Массив отсортирован.");
                                             int target = GetNum("Введите значение элемента для поиска: ");
                                             DoBinarySearch(array, length, target);
                                             break;
@@ -754,5 +794,3 @@ namespace Lab_4
         }
     }
 }
-
-
