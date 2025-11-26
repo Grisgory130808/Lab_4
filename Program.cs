@@ -536,7 +536,6 @@ namespace Lab_4
                                         {
                                             Console.WriteLine("\nВы выбрали сортировку массива простым включением");
                                             DoInsertionSort(array, length);
-                                            Console.WriteLine("Массив отсортирован.\n");
                                             break;
                                         }
                                     case 7:
